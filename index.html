@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: "Lato";
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 1.5;
+            background-color: #000;
+        }
+        .wrap {
+            padding: 60px 15px;
+            width: 100%;
+            max-width: 360px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background-color: #fff;
+        }
+        .case {
+            margin: 20px 0;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 15px;
+        }
+        a.button {
+            padding: 5px;
+            outline: none;
+            color: #fff;
+            background-color: #000;
+            border-radius: 0;
+            font-weight: 500;
+            text-align: center;
+            cursor: pointer;
+        }
+        .button > span:not(:last-child) {
+            margin-right: 5px;
+        }
+        .button > span.none {
+            color: red;
+        }
+        .button > span.circle {
+            color: green;
+        }
+        .button > span.triangle {
+            color: yellow;
+        }
+        #guessResult {
+            padding-top: 20px;
+            border-top: 1px solid #000;
+        }
+        .count-results {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div id="password"></div>
+        <input type="text" id="numInput">
+        <a class="button" id="reset">Reset</a>
+        <div class="case">
+            <a class="button" data-case="0"><span class="none">X</span></a>
+            <a class="button" data-case="1">
+                <span class="circle"><span class="amout">1</span>&#9711;</span>
+            </a>
+            <a class="button" data-case="2">
+                <span class="triangle"><span class="amout">1</span>&#9651;</span>
+            </a>
+            <a class="button" data-case="3">
+                <span class="circle"><span class="amout">1</span>&#9711;</span>
+                <span class="triangle"><span class="amout">1</span>&#9651;</span>
+            </a>
+            <a class="button" data-case="4">
+                <span class="circle"><span class="amout">2</span>&#9711;</span>
+            </a>
+            <a class="button" data-case="5">
+                <span class="triangle"><span class="amout">2</span>&#9651;</span>
+            </a>
+            <a class="button" data-case="6">
+                <span class="circle"><span class="amout">1</span>&#9711;</span>
+                <span class="triangle"><span class="amout">2</span>&#9651;</span>
+            </a>
+            <a class="button" data-case="7">
+                <span class="triangle"><span class="amout">3</span>&#9651;</span>
+            </a>
+        </div>
+        <div class="remove">
+            <input type="text" id="numRemove">
+            <a class="button" id="remove">Remove</a>
+        </div>
+        <div id="guessResult"></div>
+    </div>
+    <script>
+
+        var resetButton = document.getElementById("reset");
+        var removeButton = document.getElementById("remove");
+        var showPassword   = document.getElementById("password");
+        
+        function getAllResults() {
+            let array = [];
+            for (let  i = 1; i <= 9; i++ ) {
+                let child = [];
+                for (let j = 1; j <= 9; j++ ) {
+                    if( i == j ) continue;
+                    for (let k = 1; k <= 9; k++ ) {
+                        if( k == i || k == j ) continue;
+                        child= [ i, j, k];
+                        array.push(child);
+                    }
+                }    
+            }
+            return array;
+        }
+        function getResultsByArray( array ) {
+            let returnArray = [];
+            let length = array.length;
+            for (let  i = 0; i < length; i++ ) {
+                let child = [];
+                for (let j = 0; j < length; j++ ) {
+                    if( i == j ) continue;
+                    for (let k = 0; k < length; k++ ) {
+                        if( k == i || k == j ) continue;
+                        child= [ array[i], array[j], array[k]];
+                        returnArray.push(child);
+                    }
+                }    
+            }
+            return returnArray;
+        }
+        var results = getAllResults();
+
+        resetButton.addEventListener("click",function(event){
+            event.preventDefault();
+            // var password = initPassword();
+            var numInput = document.getElementById("numInput").value;
+            results = getAllResults();
+            showResults(results);
+        });
+
+        removeButton.addEventListener("click",function(event){
+            event.preventDefault();
+            var numRemove = document.getElementById("numRemove").value;
+            numRemove = parseInt(numRemove);
+            results = results.filter( el => !el.includes(numRemove) );
+            showResults(results);
+        });
+
+        function showResults (array) {
+            var html = "";
+            var countResults = array.length;
+            html += `<span class="count-results">Results: ${countResults}</span>`;
+            for( let item of array ) {
+                var itemStr = item.join(",");
+                html += `<span>[${itemStr}]</span>`;
+            }
+            document.getElementById("guessResult").innerHTML = html;
+        }
+        showResults(results);
+
+        var caseButtons = document.querySelectorAll(".case .button");
+        Array.from(caseButtons).forEach( caseButton => {
+            caseButton.addEventListener("click", function(event){
+                event.preventDefault();
+                var caseReturn = parseInt(caseButton.getAttribute("data-case"));
+                var numInput = document.getElementById("numInput").value;
+                var numInputArray = numInput.split("").map(el => parseInt(el)); 
+                switch (caseReturn) {
+                    case 0: // tất cả đều sai
+                        results = results.filter( el => !el.includes(numInputArray[0]) && !el.includes(numInputArray[1]) && !el.includes(numInputArray[2]) ); 
+                        break;
+                    case 1: // 1 số đúng và đúng vị trí
+                        results = results.filter( el => ( el[0] == numInputArray[0] && el[1] != numInputArray[1] && el[2] != numInputArray[2] ) 
+                                                    ||  ( el[1] == numInputArray[1] && el[2] != numInputArray[2] && el[0] != numInputArray[0] ) 
+                                                    ||  ( el[2] == numInputArray[2] && el[0] != numInputArray[0] && el[1] != numInputArray[1] ) );
+                        break;
+                    case 2: // 1 số đúng và sai vị trí
+                        results = results.filter( el => ( el.includes(numInputArray[0]) && !el.includes(numInputArray[1]) && !el.includes(numInputArray[2]) && el[0] != numInputArray[0] )
+                                                    ||  ( el.includes(numInputArray[1]) && !el.includes(numInputArray[0]) && !el.includes(numInputArray[2]) && el[1] != numInputArray[1] )
+                                                    ||  ( el.includes(numInputArray[2]) && !el.includes(numInputArray[0]) && !el.includes(numInputArray[1]) && el[2] != numInputArray[2] ) );
+                        break;
+                    case 3: // 2 số đúng: 1 đúng vị trí + 1 sai vị trí
+                        results = results.filter( el => 
+                           (el.includes(numInputArray[0]) && el.includes(numInputArray[1]) && !el.includes(numInputArray[2]) && (el[0] == numInputArray[0] && el[1] != numInputArray[1]) || (el[0] != numInputArray[0] && el[1] == numInputArray[1]))
+                        || (el.includes(numInputArray[0]) && !el.includes(numInputArray[1]) && el.includes(numInputArray[2]) && (el[0] == numInputArray[0] && el[2] != numInputArray[2]) || (el[0] != numInputArray[0] && el[2] == numInputArray[2]))
+                        || (!el.includes(numInputArray[0]) && el.includes(numInputArray[1]) && el.includes(numInputArray[2]) && (el[2] == numInputArray[2] && el[1] != numInputArray[1]) || (el[2] != numInputArray[2] && el[1] == numInputArray[1]))
+                         ); 
+                        break;
+                    case 4: // 2 đúng vị trí
+                        results = results.filter( el => ( el[0] == numInputArray[0] && el[1] == numInputArray[1] && el[2] != numInputArray[2] ) 
+                        || ( el[1] == numInputArray[1] && el[2] == numInputArray[2] && el[0] != numInputArray[0] ) 
+                        || ( el[2] == numInputArray[2] && el[0] == numInputArray[0] && el[1] != numInputArray[1] ) );
+                    case 5: // 2 sai  vị trí
+                        results = results.filter( el => 
+                                (el.includes(numInputArray[0]) && el.includes(numInputArray[1]) && !el.includes(numInputArray[2]) && el[0] != numInputArray[0] && el[1] != numInputArray[1] )
+                            ||  (el.includes(numInputArray[0]) && !el.includes(numInputArray[1]) && el.includes(numInputArray[2]) && el[0] != numInputArray[0] && el[2] != numInputArray[2] )
+                            ||  (!el.includes(numInputArray[0]) && el.includes(numInputArray[1]) && el.includes(numInputArray[2]) && el[2] != numInputArray[2] && el[1] != numInputArray[1] ) 
+                         ); 
+                        break;
+                    case 6: // 1 đúng vị trí + 2 sai  vị trí
+                        var new_results = getResultsByArray( numInputArray );
+                        results = results.filter( el => new_results.indexOf(el) !== -1 );
+                        results = results.filter( el => ( el[0] == numInputArray[0] && el[1] != numInputArray[1] && el[2] != numInputArray[2] ) 
+                                                    ||  ( el[1] == numInputArray[1] && el[2] != numInputArray[2] && el[0] != numInputArray[0] ) 
+                                                    ||  ( el[2] == numInputArray[2] && el[0] != numInputArray[0] && el[1] != numInputArray[1] ) );
+                        break;
+                    case 7: // 3 sai vị trí
+                        var new_results = getResultsByArray( numInputArray );
+                        results = results.filter( el => new_results.indexOf(el) !== -1 );
+                        results = results.filter( el =>  el[0] != numInputArray[0] && el[1] != numInputArray[1] && el[2] != numInputArray[2] );
+                        break;
+                }
+                showResults(results);
+            });
+        });
+    </script>
+</body>
+</html>
