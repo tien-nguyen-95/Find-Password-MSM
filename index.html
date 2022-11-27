@@ -159,6 +159,7 @@
             numRemove = parseInt(numRemove);
             results = results.filter( el => !el.includes(numRemove) );
             showResults(results);
+            showRandomResult(results);
         });
 
         function showResults (array) {
