@@ -225,9 +225,10 @@
                          ); 
                         break;
                     case 4: // 2 đúng vị trí
-                        results = results.filter( el => ( el[0] == numInputArray[0] && el[1] == numInputArray[1] && el[2] != numInputArray[2] ) 
-                        || ( el[1] == numInputArray[1] && el[2] == numInputArray[2] && el[0] != numInputArray[0] ) 
-                        || ( el[2] == numInputArray[2] && el[0] == numInputArray[0] && el[1] != numInputArray[1] ) );
+                        results = results.filter( el => ( el[0] == numInputArray[0] && el[1] == numInputArray[1] && !el.includes(numInputArray[2]) ) 
+                        || ( el[1] == numInputArray[1] && el[2] == numInputArray[2] && !el.includes(numInputArray[0]) ) 
+                        || ( el[2] == numInputArray[2] && el[0] == numInputArray[0] && !el.includes(numInputArray[1]) ) );
+                        break;
                     case 5: // 2 sai  vị trí
                         results = results.filter( el => 
                                 (el.includes(numInputArray[0]) && el.includes(numInputArray[1]) && !el.includes(numInputArray[2]) && el[0] != numInputArray[0] && el[1] != numInputArray[1] )
