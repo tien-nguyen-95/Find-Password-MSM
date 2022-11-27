@@ -62,12 +62,16 @@
         .count-results {
             display: block;
         }
+        #random {
+            font-size: 30px;
+            color: black;
+        }
     </style>
 </head>
 <body>
     <div class="wrap">
-        <div id="password"></div>
-        <input type="text" id="numInput">
+        <div id="random"></div>
+        <input type="hidden" id="numInput">
         <a class="button" id="reset">Reset</a>
         <div class="case">
             <a class="button" data-case="0"><span class="none">X</span></a>
@@ -146,6 +150,7 @@
             var numInput = document.getElementById("numInput").value;
             results = getAllResults();
             showResults(results);
+            showRandomResult(results);
         });
 
         removeButton.addEventListener("click",function(event){
@@ -161,12 +166,34 @@
             var countResults = array.length;
             html += `<span class="count-results">Results: ${countResults}</span>`;
             for( let item of array ) {
-                var itemStr = item.join(",");
+                var itemStr = item.join("");
                 html += `<span>[${itemStr}]</span>`;
             }
             document.getElementById("guessResult").innerHTML = html;
         }
+        function showRandomResult(array) {
+
+            var randomKey = Math.floor(Math.random()*array.length); 
+            var randomResult = array[randomKey].join(""); 
+
+            document.getElementById("numInput").value = randomResult;
+            document.getElementById("random").innerHTML = randomResult;
+        }
         showResults(results);
+        showRandomResult(results);
+
+        function searchForArray(haystack, needle){
+            var i, j, current;
+            for(i = 0; i < haystack.length; ++i){
+                if(needle.length === haystack[i].length){
+                current = haystack[i];
+                for(j = 0; j < needle.length && needle[j] === current[j]; ++j);
+                if(j === needle.length)
+                    return i;
+                }
+            }
+            return -1;
+        }
 
         var caseButtons = document.querySelectorAll(".case .button");
         Array.from(caseButtons).forEach( caseButton => {
@@ -209,18 +236,19 @@
                         break;
                     case 6: // 1 đúng vị trí + 2 sai  vị trí
                         var new_results = getResultsByArray( numInputArray );
-                        results = results.filter( el => new_results.indexOf(el) !== -1 );
+                        results = results.filter( el => searchForArray(new_results,el) !== -1 );
                         results = results.filter( el => ( el[0] == numInputArray[0] && el[1] != numInputArray[1] && el[2] != numInputArray[2] ) 
                                                     ||  ( el[1] == numInputArray[1] && el[2] != numInputArray[2] && el[0] != numInputArray[0] ) 
                                                     ||  ( el[2] == numInputArray[2] && el[0] != numInputArray[0] && el[1] != numInputArray[1] ) );
                         break;
                     case 7: // 3 sai vị trí
-                        var new_results = getResultsByArray( numInputArray );
-                        results = results.filter( el => new_results.indexOf(el) !== -1 );
+                        var new_results = getResultsByArray( numInputArray ); console.log(numInputArray); console.log(new_results);
+                        results = results.filter( el => searchForArray(new_results,el) !== -1 ); console.log(results);
                         results = results.filter( el =>  el[0] != numInputArray[0] && el[1] != numInputArray[1] && el[2] != numInputArray[2] );
                         break;
                 }
                 showResults(results);
+                showRandomResult(results);
             });
         });
     </script>
